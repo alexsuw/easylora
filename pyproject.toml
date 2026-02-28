@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "easylora"
-version = "0.1.1"
+version = "0.1.2"
 description = "Batteries-included toolkit for LoRA / QLoRA fine-tuning with Hugging Face Transformers"
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -30,6 +30,7 @@ dependencies = [
     "peft>=0.10",
     "datasets>=2.16",
     "accelerate>=0.26",
+    "bitsandbytes>=0.41",
     "pydantic>=2.0",
     "typer>=0.9",
     "pyyaml>=6.0",
