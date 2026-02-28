@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Autopilot training subsystem (`easylora/autopilot/`) with hardware, model, and dataset
+  analysis that resolves a complete `TrainConfig` from minimal inputs.
+- New Python API: `autopilot_plan(...)` and `autopilot_train(...)`.
+- New CLI command: `easylora autopilot plan ...` for transparent dry-run strategy output.
+- Extended training CLI to support no-config training: `easylora train --autopilot --model ... --dataset ...`.
+- Autopilot transparency artifacts: `resolved_config.yaml` and `autopilot_report.json`.
+- Autopilot-focused tests for hardware detection, dataset analysis, planner validity, and API smoke path.
+
 ## [0.1.2] - 2026-02-28
 
 ### Changed

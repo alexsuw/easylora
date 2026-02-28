@@ -11,6 +11,7 @@ with a single CLI command.
 - **LoRA and QLoRA** fine-tuning for causal language models
 - **Auto target module detection** for 16+ architectures
 - **Config-driven** workflow with Pydantic v2 validation
+- **Autopilot mode** for no-config planning and training
 - **CLI and Python API** for training, evaluation, and adapter management
 - **Safe defaults**: bf16, gradient checkpointing, pad token handling
 - **Reproducible**: configs saved, seeds set, deterministic mode available

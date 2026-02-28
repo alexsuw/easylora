@@ -56,6 +56,25 @@ config = TrainConfig(
 artifacts = train(config)
 ```
 
+### Autopilot (No Manual Config)
+
+```python
+from easylora import autopilot_plan, autopilot_train
+
+plan = autopilot_plan(
+    model="meta-llama/Llama-3.2-1B",
+    dataset="tatsu-lab/alpaca",
+    quality="balanced",
+)
+for line in plan.to_pretty_lines():
+    print(line)
+
+artifacts = autopilot_train(
+    model="meta-llama/Llama-3.2-1B",
+    dataset="tatsu-lab/alpaca",
+)
+```
+
 ### Using the Trainer Directly
 
 ```python
@@ -80,6 +99,25 @@ trainer.merge_and_save("./merged_model")
 
 ```bash
 easylora train --config config.yaml
+```
+
+### Train with Autopilot
+
+```bash
+easylora train \
+    --autopilot \
+    --model meta-llama/Llama-3.2-1B \
+    --dataset tatsu-lab/alpaca \
+    --quality balanced
+```
+
+### Dry-run an Autopilot Plan
+
+```bash
+easylora autopilot plan \
+    --model meta-llama/Llama-3.2-1B \
+    --dataset tatsu-lab/alpaca \
+    --print-config
 ```
 
 ### Generate a Starter Config

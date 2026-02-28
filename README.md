@@ -79,8 +79,20 @@ easylora init-config --template sft-lora
 # Train
 easylora train --config easylora_config.yaml
 
+# Train with autopilot (no config file)
+easylora train \
+  --autopilot \
+  --model meta-llama/Llama-3.2-1B \
+  --dataset tatsu-lab/alpaca
+
 # Validate config without training
 easylora train --config config.yaml --dry-run
+
+# Plan autopilot choices without training
+easylora autopilot plan \
+  --model meta-llama/Llama-3.2-1B \
+  --dataset tatsu-lab/alpaca \
+  --quality balanced
 
 # Evaluate
 easylora eval --base-model meta-llama/Llama-3.2-1B --adapter-dir ./output/adapter --dataset eval.jsonl
@@ -118,6 +130,32 @@ output:
 repro:
   seed: 42
 ```
+
+## Autopilot Training
+
+Autopilot generates a full `TrainConfig` from minimal inputs, then runs the existing training
+pipeline unchanged.
+
+```python
+from easylora import autopilot_plan, autopilot_train
+
+plan = autopilot_plan(
+    model="meta-llama/Llama-3.2-1B",
+    dataset="tatsu-lab/alpaca",
+    quality="balanced",  # fast | balanced | high
+)
+print(plan.to_pretty_lines())
+
+artifacts = autopilot_train(
+    model="meta-llama/Llama-3.2-1B",
+    dataset="tatsu-lab/alpaca",
+)
+```
+
+When autopilot is used, easylora also saves:
+
+- `resolved_config.yaml` — full resolved configuration used for training
+- `autopilot_report.json` — hardware profile, dataset/model analysis, chosen values, and reasoning
 
 ## Model Compatibility
 

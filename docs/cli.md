@@ -16,7 +16,15 @@ easylora train --config config.yaml [OPTIONS]
 
 | Option | Description |
 |---|---|
-| `--config`, `-c` | Path to YAML/JSON config file (required) |
+| `--config`, `-c` | Path to YAML/JSON config file (required unless `--autopilot`) |
+| `--autopilot` | Auto-plan training from model + dataset |
+| `--model`, `-m` | Base model ID/path (required with `--autopilot`) |
+| `--dataset`, `-d` | Dataset path or HF name (required with `--autopilot`) |
+| `--quality` | Autopilot quality preset: `fast`, `balanced`, `high` |
+| `--output-dir` | Output directory used in autopilot mode |
+| `--subset` | Dataset subset/config name for autopilot mode |
+| `--split` | Dataset split for autopilot mode (default: `train`) |
+| `--seed` | Seed for reproducibility |
 | `--force` | Allow overwriting output directory |
 | `--set` | Override config value as `key=value` (repeatable) |
 | `--dry-run` | Validate config and print settings without training |
@@ -28,6 +36,12 @@ easylora train --config config.yaml [OPTIONS]
 # Basic training
 easylora train --config config.yaml
 
+# Autopilot training (no config file)
+easylora train \
+    --autopilot \
+    --model meta-llama/Llama-3.2-1B \
+    --dataset tatsu-lab/alpaca
+
 # Override learning rate
 easylora train --config config.yaml --set optim.lr=1e-5
 
@@ -36,6 +50,34 @@ easylora train --config config.yaml --dry-run
 
 # Overwrite existing output
 easylora train --config config.yaml --force
+```
+
+## `easylora autopilot plan`
+
+Generate and print autopilot decisions without training.
+
+```bash
+easylora autopilot plan [OPTIONS]
+```
+
+| Option | Description |
+|---|---|
+| `--model`, `-m` | Base model ID/path (required) |
+| `--dataset`, `-d` | Dataset path or HF name (required) |
+| `--quality` | Preset: `fast`, `balanced`, `high` |
+| `--output-dir` | Planned output directory |
+| `--subset` | Dataset subset/config name |
+| `--split` | Dataset split (default: `train`) |
+| `--print-config` | Print resolved TrainConfig YAML |
+
+**Example:**
+
+```bash
+easylora autopilot plan \
+    --model meta-llama/Llama-3.2-1B \
+    --dataset tatsu-lab/alpaca \
+    --quality balanced \
+    --print-config
 ```
 
 ## `easylora eval`
