@@ -66,9 +66,7 @@ def _build_text(
 
     messages = example.get("messages", [])
     try:
-        return tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=False
-        )  # type: ignore[no-any-return]
+        return tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=False)  # type: ignore[no-any-return]
     except Exception:
         # Fallback if tokenizer does not define a chat template.
         return "\n".join(

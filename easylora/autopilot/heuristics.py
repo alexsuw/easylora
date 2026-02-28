@@ -56,14 +56,12 @@ def resolve_plan(
             )
     else:
         reasons.append(
-            "Selected LoRA because hardware has enough memory "
-            "for full-precision base load."
+            "Selected LoRA because hardware has enough memory for full-precision base load."
         )
 
     max_seq_len = _resolve_seq_len(dataset.p95_tokens, model.context_length)
     reasons.append(
-        f"Set max_seq_len={max_seq_len} from dataset p95 "
-        f"token length={dataset.p95_tokens}."
+        f"Set max_seq_len={max_seq_len} from dataset p95 token length={dataset.p95_tokens}."
     )
 
     lora_r = _resolve_lora_rank(preset.base_lora_rank, params_b)
