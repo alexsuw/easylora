@@ -7,7 +7,7 @@ import logging
 import subprocess
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 import torch
 
@@ -51,6 +51,30 @@ def _find_last_checkpoint(output_dir: Path) -> str | None:
     if checkpoints:
         return str(checkpoints[-1])
     return None
+
+
+def _enable_model_parallel_if_sharded(model: object, config: TrainConfig) -> None:
+    """Mark model as model-parallel when using sharded ``device_map='auto'``.
+
+    This prevents Hugging Face Trainer from wrapping the model in DataParallel,
+    which is incompatible with pre-sharded modules spread across multiple GPUs.
+    """
+    if config.model.device_map != "auto":
+        return
+    if not torch.cuda.is_available() or torch.cuda.device_count() < 2:
+        return
+
+    model_any = cast(Any, model)
+    model_any.is_parallelizable = True
+    model_any.model_parallel = True
+
+    base_model = getattr(model, "base_model", None)
+    if base_model is not None:
+        base_model_any = cast(Any, base_model)
+        base_model_any.is_parallelizable = True
+        base_model_any.model_parallel = True
+
+    logger.info("Enabled model-parallel training for sharded device_map='auto'.")
 
 
 class EasyLoRATrainer:
@@ -130,6 +154,7 @@ class EasyLoRATrainer:
         self._model = apply_lora(base_model, cfg.lora, cfg.model)
         assert self._model is not None
         assert self._tokenizer is not None
+        _enable_model_parallel_if_sharded(self._model, cfg)
 
         if cfg.training.gradient_checkpointing:
             self._model.enable_input_require_grads()
