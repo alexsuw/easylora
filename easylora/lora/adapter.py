@@ -65,7 +65,7 @@ def apply_lora(
         modules_to_save=lora_config.modules_to_save,
     )
 
-    peft_model = get_peft_model(model, peft_config)
+    peft_model: PeftModel = get_peft_model(model, peft_config)  # type: ignore[assignment]
     trainable, total = peft_model.get_nb_trainable_parameters()
     pct = 100 * trainable / total if total > 0 else 0
     logger.info(

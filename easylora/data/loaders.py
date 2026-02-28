@@ -104,7 +104,7 @@ def _warn_short_samples(ds: Dataset, cfg: DataConfig) -> None:
     if field not in ds.column_names:
         return
 
-    short = sum(1 for ex in ds if len(str(ex.get(field, ""))) < 10)
+    short = sum(1 for ex in ds if len(str(ex[field])) < 10)
     if short > 0:
         pct = 100 * short / len(ds)
         logger.warning(

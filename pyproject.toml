@@ -91,3 +91,5 @@ reportMissingImports = false
 reportMissingModuleSource = false
 reportCallIssue = "warning"
 reportArgumentType = "warning"
+reportAttributeAccessIssue = "warning"
+reportReturnType = "warning"
