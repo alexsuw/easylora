@@ -12,6 +12,7 @@ Usage::
 
 import typer
 
+from easylora.cli.autopilot_cmd import app as autopilot_app
 from easylora.cli.doctor_cmd import doctor
 from easylora.cli.eval_cmd import eval_cmd, merge
 from easylora.cli.init_cmd import init_config
@@ -31,6 +32,7 @@ app.command("merge")(merge)
 app.command("doctor")(doctor)
 app.command("inspect-targets")(inspect_targets)
 app.command("init-config")(init_config)
+app.add_typer(autopilot_app, name="autopilot")
 
 if __name__ == "__main__":
     app()
