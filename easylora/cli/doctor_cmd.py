@@ -6,6 +6,8 @@ import sys
 from rich.console import Console
 from rich.table import Table
 
+from easylora.autopilot.hardware import detect_hardware
+
 
 def doctor() -> None:
     """Print environment diagnostics for debugging."""
@@ -29,12 +31,13 @@ def doctor() -> None:
         import torch
 
         table.add_row("PyTorch", torch.__version__)
-        table.add_row("CUDA available", str(torch.cuda.is_available()))
-        if torch.cuda.is_available():
+        hw = detect_hardware()
+        table.add_row("CUDA available", str(hw.cuda_available))
+        if hw.cuda_available:
             table.add_row("CUDA version", torch.version.cuda or "N/A")
-            table.add_row("GPU", torch.cuda.get_device_name(0))
-            table.add_row("bf16 (CUDA)", str(torch.cuda.is_bf16_supported()))
-        if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+            table.add_row("GPU", hw.gpu_name or "N/A")
+            table.add_row("bf16 (CUDA)", str(hw.bf16_supported))
+        if hw.mps_available:
             table.add_row("MPS available", "True")
     except ImportError:
         table.add_row("PyTorch", "[red]not installed[/red]")

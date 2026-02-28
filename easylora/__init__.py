@@ -3,6 +3,7 @@
 Public API::
 
     from easylora import train, TrainConfig, EasyLoRATrainer
+    from easylora import autopilot_plan, autopilot_train
     from easylora import save_adapter, load_adapter, merge_adapter
 """
 
@@ -12,6 +13,7 @@ from importlib.metadata import version
 
 __version__: str = version("easylora")
 
+from easylora.autopilot.api import autopilot_plan, autopilot_train
 from easylora.config import RunArtifacts, TrainConfig
 from easylora.lora.adapter import load_adapter, save_adapter
 from easylora.lora.merge import merge_adapter
@@ -43,6 +45,8 @@ __all__ = [
     "EasyLoRATrainer",
     "RunArtifacts",
     "TrainConfig",
+    "autopilot_plan",
+    "autopilot_train",
     "load_adapter",
     "merge_adapter",
     "save_adapter",
