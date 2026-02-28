@@ -1,0 +1,67 @@
+name: Bug Report
+description: Report a bug in easylora
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Run `easylora train --config ...`
+        2. Wait for epoch 3
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: A clear description of what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: "OS, Python version, torch version, easylora version."
+      placeholder: |
+        Paste the output of `easylora doctor`:
+
+        $ easylora doctor
+        easylora: 0.x.x
+        python: 3.xx.x
+        torch: 2.x.x
+        cuda: 12.x
+        os: Linux / macOS / Windows
+    validations:
+      required: true
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Config file used (if applicable)
+      description: Paste your YAML config or relevant sections.
+      render: yaml
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Paste any relevant logs or tracebacks.
+      render: shell
+    validations:
+      required: false

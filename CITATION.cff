@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+title: easylora
+message: "If you use this software, please cite it using these metadata."
+type: software
+license: Apache-2.0
+version: 0.1.0
+date-released: "2025-01-01"
+repository-code: "https://github.com/alexsuw/easylora"
+url: "https://alexsuw.github.io/easylora/"
+authors:
+  - name: "easylora contributors"
+keywords:
+  - lora
+  - qlora
+  - fine-tuning
+  - peft
+  - transformers
+  - llm
