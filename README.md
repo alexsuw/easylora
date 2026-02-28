@@ -1,6 +1,7 @@
 # easylora
 
 [![CI](https://github.com/alexsuw/easylora/actions/workflows/ci.yml/badge.svg)](https://github.com/alexsuw/easylora/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/easylora.svg)](https://pypi.org/project/easylora/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
 
@@ -24,9 +25,22 @@ easylora wraps `transformers` + `peft` with safe defaults, reproducibility, and 
 pip install easylora
 ```
 
-For QLoRA support: `pip install bitsandbytes`
+Optional extras:
 
-For development: `pip install -e ".[dev]"`
+```bash
+pip install "easylora[qlora]"   # adds bitsandbytes for 4-bit/8-bit quantisation
+pip install "easylora[wandb]"   # adds Weights & Biases logging
+pip install "easylora[dev]"     # adds ruff, pyright, pytest, mkdocs, pre-commit
+pip install "easylora[all]"     # everything
+```
+
+For development from source:
+
+```bash
+git clone https://github.com/alexsuw/easylora.git
+cd easylora
+pip install -e ".[dev]"
+```
 
 ## Quickstart (Python)
 

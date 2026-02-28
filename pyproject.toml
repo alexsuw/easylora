@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "easylora"
-version = "0.1.0"
+version = "0.1.1"
 description = "Batteries-included toolkit for LoRA / QLoRA fine-tuning with Hugging Face Transformers"
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -15,11 +15,14 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
 ]
 dependencies = [
     "torch>=2.1",
@@ -34,20 +37,24 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+qlora = ["bitsandbytes>=0.41"]
 wandb = ["wandb>=0.16"]
 eval = ["scikit-learn>=1.3"]
+docs = [
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.24",
+]
 dev = [
     "pytest>=7.4",
     "pytest-timeout>=2.2",
     "ruff>=0.3",
     "pyright>=1.1",
     "build>=1.0",
-    "twine>=5.0",
-    "mkdocs-material>=9.5",
-    "mkdocstrings[python]>=0.24",
+    "twine>=5.0,<6.0",
     "pre-commit>=3.6",
+    "easylora[docs]",
 ]
-all = ["easylora[wandb,eval,dev]"]
+all = ["easylora[qlora,wandb,eval,dev]"]
 
 [project.scripts]
 easylora = "easylora.cli.main:app"
