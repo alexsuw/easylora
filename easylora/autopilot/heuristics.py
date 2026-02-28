@@ -55,10 +55,16 @@ def resolve_plan(
                 "bitsandbytes was not detected; training may fail until it is installed."
             )
     else:
-        reasons.append("Selected LoRA because hardware has enough memory for full-precision base load.")
+        reasons.append(
+            "Selected LoRA because hardware has enough memory "
+            "for full-precision base load."
+        )
 
     max_seq_len = _resolve_seq_len(dataset.p95_tokens, model.context_length)
-    reasons.append(f"Set max_seq_len={max_seq_len} from dataset p95 token length={dataset.p95_tokens}.")
+    reasons.append(
+        f"Set max_seq_len={max_seq_len} from dataset p95 "
+        f"token length={dataset.p95_tokens}."
+    )
 
     lora_r = _resolve_lora_rank(preset.base_lora_rank, params_b)
     lora_alpha = lora_r * 2
@@ -142,9 +148,7 @@ def _resolve_batching(
     params_b: float,
     target_effective_batch: int,
 ) -> tuple[int, int]:
-    if vram_gb <= 0:
-        micro = 1
-    elif vram_gb <= 10:
+    if vram_gb <= 10:
         micro = 1
     elif vram_gb <= 16:
         micro = 2

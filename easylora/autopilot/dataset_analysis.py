@@ -46,7 +46,12 @@ def infer_dataset_format(column_names: list[str]) -> tuple[str, str]:
     return "raw", "text"
 
 
-def _build_text(example: dict[str, Any], inferred_format: str, text_field: str, tokenizer: Any) -> str:
+def _build_text(
+    example: dict[str, Any],
+    inferred_format: str,
+    text_field: str,
+    tokenizer: Any,
+) -> str:
     if inferred_format == "raw":
         return str(example.get(text_field, ""))
 
@@ -67,14 +72,16 @@ def _build_text(example: dict[str, Any], inferred_format: str, text_field: str, 
     except Exception:
         # Fallback if tokenizer does not define a chat template.
         return "\n".join(
-            f"{m.get('role', 'user')}: {m.get('content', '')}" for m in messages if isinstance(m, dict)
+            f"{m.get('role', 'user')}: {m.get('content', '')}"
+            for m in messages
+            if isinstance(m, dict)
         )
 
 
 def _percentile(sorted_values: list[int], p: float) -> int:
     if not sorted_values:
         return 0
-    idx = int(round((len(sorted_values) - 1) * p))
+    idx = round((len(sorted_values) - 1) * p)
     idx = max(0, min(idx, len(sorted_values) - 1))
     return sorted_values[idx]
 
@@ -96,6 +103,8 @@ def analyze_dataset(
         subset=subset,
         format="raw",
         text_field="text",
+        max_seq_len=2048,
+        val_split_ratio=0.0,
     )
     ds = load_dataset_any(cfg)
     inferred_format, text_field = infer_dataset_format(ds.column_names)
@@ -127,6 +136,8 @@ def _token_lengths(
 ) -> list[int]:
     lengths: list[int] = []
     for ex in ds:
+        if not isinstance(ex, dict):
+            continue
         text = _build_text(ex, inferred_format, text_field, tokenizer)
         ids = tokenizer(text, truncation=False, padding=False).get("input_ids", [])
         lengths.append(len(ids))

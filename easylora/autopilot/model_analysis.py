@@ -27,7 +27,8 @@ class ModelProfile:
 def analyze_model(model: str, *, trust_remote_code: bool = False) -> ModelProfile:
     """Inspect HF config and return compact model profile."""
     cfg = AutoConfig.from_pretrained(model, trust_remote_code=trust_remote_code)
-    arch = cfg.architectures[0] if getattr(cfg, "architectures", None) else "unknown"
+    archs = getattr(cfg, "architectures", None)
+    arch = archs[0] if isinstance(archs, list) and archs else "unknown"
     model_type = getattr(cfg, "model_type", "unknown")
     hidden_size = _pick_int(cfg, "hidden_size", "d_model", "n_embd")
     num_hidden_layers = _pick_int(cfg, "num_hidden_layers", "n_layer")

@@ -112,10 +112,12 @@ class EasyLoRATrainer:
             )
             self._train_dataset = split["train"]
             self._eval_dataset = split["test"]
+            train_ds = self._train_dataset
+            eval_ds = self._eval_dataset
             logger.info(
                 "Split: %d train, %d eval",
-                len(self._train_dataset),
-                len(self._eval_dataset),
+                len(train_ds),
+                len(eval_ds),
             )
         else:
             self._train_dataset = formatted
@@ -126,6 +128,8 @@ class EasyLoRATrainer:
 
         logger.info("Applying LoRA...")
         self._model = apply_lora(base_model, cfg.lora, cfg.model)
+        assert self._model is not None
+        assert self._tokenizer is not None
 
         if cfg.training.gradient_checkpointing:
             self._model.enable_input_require_grads()

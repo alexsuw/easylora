@@ -12,7 +12,12 @@ class _FakeTokenizer:
         _ = truncation, padding
         return {"input_ids": list(range(max(1, len(text.split()))))}
 
-    def apply_chat_template(self, messages, tokenize: bool = False, add_generation_prompt: bool = False):
+    def apply_chat_template(
+        self,
+        messages,
+        tokenize: bool = False,
+        add_generation_prompt: bool = False,
+    ):
         _ = tokenize, add_generation_prompt
         return "\n".join(f"{m['role']}: {m['content']}" for m in messages)
 

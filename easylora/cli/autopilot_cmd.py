@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Optional
+from typing import Annotated, Optional, cast
 
 import typer
 import yaml
 from rich.console import Console
 
 from easylora.autopilot.api import autopilot_plan
+from easylora.autopilot.presets import AutopilotQuality
 
 console = Console()
 app = typer.Typer(
@@ -42,11 +43,12 @@ def plan_cmd(
     """Dry-run autopilot planning with transparent strategy output."""
     if quality not in {"fast", "balanced", "high"}:
         raise typer.BadParameter("--quality must be one of: fast, balanced, high.")
+    quality_value = cast(AutopilotQuality, quality)
 
     plan = autopilot_plan(
         model=model,
         dataset=dataset,
-        quality=quality,
+        quality=quality_value,
         output_dir=output_dir,
         subset=subset,
         split=split,
@@ -61,4 +63,6 @@ def plan_cmd(
 
     if print_config:
         console.print("\n[bold]Resolved TrainConfig:[/]")
-        console.print(yaml.dump(plan.config.model_dump(), default_flow_style=False, sort_keys=False))
+        console.print(
+            yaml.dump(plan.config.model_dump(), default_flow_style=False, sort_keys=False)
+        )

@@ -1,7 +1,7 @@
 """CLI ``train`` subcommand."""
 
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Optional, cast
 
 import typer
 import yaml
@@ -9,6 +9,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 from easylora.autopilot.api import autopilot_plan, autopilot_train
+from easylora.autopilot.presets import AutopilotQuality
 from easylora.config import load_config
 from easylora.train.trainer import EasyLoRATrainer
 
@@ -76,12 +77,13 @@ def train(
             raise typer.BadParameter("--set overrides are not supported in --autopilot mode.")
         if quality not in {"fast", "balanced", "high"}:
             raise typer.BadParameter("--quality must be one of: fast, balanced, high.")
+        quality_value = cast(AutopilotQuality, quality)
 
         if print_config or dry_run:
             plan = autopilot_plan(
                 model=model,
                 dataset=dataset,
-                quality=quality,
+                quality=quality_value,
                 output_dir=output_dir,
                 subset=subset,
                 split=split,
@@ -103,7 +105,7 @@ def train(
         artifacts = autopilot_train(
             model=model,
             dataset=dataset,
-            quality=quality,
+            quality=quality_value,
             output_dir=output_dir,
             subset=subset,
             split=split,
