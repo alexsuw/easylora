@@ -4,20 +4,20 @@ from __future__ import annotations
 
 import logging
 import math
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import torch
 
 if TYPE_CHECKING:
     from datasets import Dataset
-    from transformers import PreTrainedModel, PreTrainedTokenizer
+    from transformers import PreTrainedTokenizer
 
 logger = logging.getLogger(__name__)
 
 
 @torch.no_grad()
 def compute_perplexity(
-    model: PreTrainedModel,
+    model: Any,
     tokenizer: PreTrainedTokenizer,
     dataset: Dataset,
     max_seq_len: int = 2048,
