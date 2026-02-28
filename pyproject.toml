@@ -1,0 +1,91 @@
+[build-system]
+requires = ["hatchling>=1.21,<1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "easylora"
+version = "0.1.0"
+description = "Batteries-included toolkit for LoRA / QLoRA fine-tuning with Hugging Face Transformers"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.10"
+authors = [{ name = "easylora contributors" }]
+keywords = ["lora", "qlora", "fine-tuning", "peft", "transformers", "llm"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "torch>=2.1",
+    "transformers>=4.38",
+    "peft>=0.10",
+    "datasets>=2.16",
+    "accelerate>=0.26",
+    "pydantic>=2.0",
+    "typer>=0.9",
+    "pyyaml>=6.0",
+    "rich>=13.0",
+]
+
+[project.optional-dependencies]
+wandb = ["wandb>=0.16"]
+eval = ["scikit-learn>=1.3"]
+dev = [
+    "pytest>=7.4",
+    "pytest-timeout>=2.2",
+    "ruff>=0.3",
+    "pyright>=1.1",
+    "build>=1.0",
+    "twine>=5.0",
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.24",
+    "pre-commit>=3.6",
+]
+all = ["easylora[wandb,eval,dev]"]
+
+[project.scripts]
+easylora = "easylora.cli.main:app"
+
+[project.urls]
+Homepage = "https://github.com/alexsuw/easylora"
+Repository = "https://github.com/alexsuw/easylora"
+Documentation = "https://alexsuw.github.io/easylora/"
+Changelog = "https://github.com/alexsuw/easylora/blob/main/CHANGELOG.md"
+Issues = "https://github.com/alexsuw/easylora/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["easylora"]
+
+[tool.hatch.build]
+exclude = ["tests/", "notebooks/", "docs/"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --tb=short"
+markers = ["slow: marks tests that download models or run training (deselect with '-m \"not slow\"')"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B", "SIM", "RUF"]
+ignore = ["UP007", "UP045"]
+
+[tool.ruff.lint.per-file-ignores]
+"easylora/cli/*.py" = ["UP007", "UP045"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pyright]
+pythonVersion = "3.10"
+typeCheckingMode = "basic"
+reportMissingImports = false
+reportMissingModuleSource = false

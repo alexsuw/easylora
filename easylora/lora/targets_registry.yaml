@@ -1,0 +1,52 @@
+# LoRA target module registry.
+# Maps architecture class names and model_type strings to default target modules.
+# Add new entries here to support additional architectures without code changes.
+
+architectures:
+  # LLaMA family
+  LlamaForCausalLM: [q_proj, v_proj]
+  # Mistral / Mixtral
+  MistralForCausalLM: [q_proj, v_proj]
+  MixtralForCausalLM: [q_proj, v_proj]
+  # Qwen
+  QWenLMHeadModel: [c_attn]
+  Qwen2ForCausalLM: [q_proj, v_proj]
+  # GPT-NeoX / Pythia
+  GPTNeoXForCausalLM: [query_key_value]
+  # MPT
+  MptForCausalLM: [Wqkv]
+  # Falcon
+  FalconForCausalLM: [query_key_value]
+  RWForCausalLM: [query_key_value]
+  # Phi
+  PhiForCausalLM: [q_proj, v_proj]
+  Phi3ForCausalLM: [qkv_proj]
+  # Gemma
+  GemmaForCausalLM: [q_proj, v_proj]
+  Gemma2ForCausalLM: [q_proj, v_proj]
+  # GPT-BigCode / StarCoder
+  GPTBigCodeForCausalLM: [c_attn]
+  # GPT-2
+  GPT2LMHeadModel: [c_attn]
+  # OPT
+  OPTForCausalLM: [q_proj, v_proj]
+  # Bloom
+  BloomForCausalLM: [query_key_value]
+
+model_types:
+  llama: [q_proj, v_proj]
+  mistral: [q_proj, v_proj]
+  mixtral: [q_proj, v_proj]
+  qwen: [c_attn]
+  qwen2: [q_proj, v_proj]
+  gpt_neox: [query_key_value]
+  mpt: [Wqkv]
+  falcon: [query_key_value]
+  phi: [q_proj, v_proj]
+  phi3: [qkv_proj]
+  gemma: [q_proj, v_proj]
+  gemma2: [q_proj, v_proj]
+  gpt_bigcode: [c_attn]
+  gpt2: [c_attn]
+  opt: [q_proj, v_proj]
+  bloom: [query_key_value]

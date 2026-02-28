@@ -1,0 +1,45 @@
+# Example: LoRA fine-tuning config for easylora
+# Usage: easylora train --config examples/sft_lora.yaml
+
+model:
+  base_model: "meta-llama/Llama-3.2-1B"
+  torch_dtype: "auto"
+  # load_in_4bit: true   # uncomment for QLoRA (requires bitsandbytes)
+
+data:
+  dataset_name: "tatsu-lab/alpaca"
+  format: "alpaca"
+  max_seq_len: 2048
+  val_split_ratio: 0.02
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: "auto"
+  bias: "none"
+
+optim:
+  lr: 2e-4
+  weight_decay: 0.01
+  warmup_ratio: 0.03
+  scheduler: "cosine"
+
+training:
+  epochs: 3
+  batch_size: 4
+  grad_accum: 4
+  logging_steps: 10
+  save_steps: 500
+  eval_steps: 500
+  gradient_checkpointing: true
+
+output:
+  output_dir: "./output/llama-3.2-1b-lora"
+  run_name: "llama-lora-alpaca"
+  save_total_limit: 3
+  # push_to_hub: true
+  # hub_repo_id: "your-username/llama-lora-alpaca"
+
+repro:
+  seed: 42
