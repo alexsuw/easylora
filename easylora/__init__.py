@@ -3,7 +3,8 @@
 Public API::
 
     from easylora import train, TrainConfig, EasyLoRATrainer
-    from easylora import autopilot_plan, autopilot_train
+    from easylora import autopilot_plan, autopilot_train, save_autopilot_report
+    from easylora import train_dpo
     from easylora import save_adapter, load_adapter, merge_adapter
 """
 
@@ -13,13 +14,22 @@ from importlib.metadata import version
 
 __version__: str = version("easylora")
 
-from easylora.autopilot.api import autopilot_plan, autopilot_train
-from easylora.config import RunArtifacts, TrainConfig
+from easylora.align import train_dpo
+from easylora.autopilot.api import autopilot_plan, autopilot_train, save_autopilot_report
+from easylora.config import (
+    DPOConfig,
+    DPOTrainConfig,
+    DataConfig,
+    ModelConfig,
+    PreferenceDataConfig,
+    RunArtifacts,
+    TrainConfig,
+    load_config,
+)
 from easylora.lora.adapter import load_adapter, save_adapter
 from easylora.lora.merge import merge_adapter
 from easylora.train.trainer import EasyLoRATrainer
 
-# TODO: RLHF / DPO / PPO pipelines (out of scope for MVP)
 # TODO: Multi-node distributed training (out of scope for MVP)
 # TODO: Vision-language model support (out of scope for MVP)
 # TODO: Full Diffusers adapter support (architecture stubs only for now)
@@ -43,12 +53,20 @@ def train(config: TrainConfig) -> RunArtifacts:
 
 __all__ = [
     "EasyLoRATrainer",
+    "DPOConfig",
+    "DPOTrainConfig",
+    "DataConfig",
+    "ModelConfig",
+    "PreferenceDataConfig",
     "RunArtifacts",
     "TrainConfig",
     "autopilot_plan",
     "autopilot_train",
+    "load_config",
     "load_adapter",
     "merge_adapter",
+    "save_autopilot_report",
     "save_adapter",
     "train",
+    "train_dpo",
 ]

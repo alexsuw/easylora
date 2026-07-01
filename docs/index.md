@@ -1,43 +1,44 @@
 # easylora
 
-**Batteries-included toolkit for LoRA / QLoRA fine-tuning** with Hugging Face
-Transformers.
+**Zero-config Autopilot for LoRA / QLoRA fine-tuning.**
 
-Fine-tune any causal language model with LoRA in under 20 lines of Python, or
-with a single CLI command.
-
-## Features
-
-- **LoRA and QLoRA** fine-tuning for causal language models
-- **Auto target module detection** for 16+ architectures
-- **Config-driven** workflow with Pydantic v2 validation
-- **Autopilot mode** for no-config planning and training
-- **CLI and Python API** for training, evaluation, and adapter management
-- **Safe defaults**: bf16, gradient checkpointing, pad token handling
-- **Reproducible**: configs saved, seeds set, deterministic mode available
-- **Portable artifacts**: save, load, merge, and push adapters to HF Hub
-
-## Quick Example
-
-```python
-from easylora import train, TrainConfig
-from easylora.config import ModelConfig, DataConfig
-
-config = TrainConfig(
-    model=ModelConfig(base_model="meta-llama/Llama-3.2-1B"),
-    data=DataConfig(
-        dataset_name="tatsu-lab/alpaca",
-        format="alpaca",
-        max_seq_len=2048,
-    ),
-)
-artifacts = train(config)
-```
-
-Or via CLI:
+easylora profiles your hardware, model, and dataset, chooses safe training
+settings, and writes a shareable report explaining every decision.
 
 ```bash
-easylora train --config config.yaml
+easylora train --autopilot \
+    --model meta-llama/Llama-3.2-1B \
+    --dataset tatsu-lab/alpaca \
+    --quality balanced
+```
+
+## What you get
+
+- **Autopilot planning** for LoRA vs QLoRA, sequence length, batch size, rank,
+  learning rate, and duration.
+- **Explainable artifacts**: `resolved_config.yaml`, `autopilot_report.json`,
+  `autopilot_report.md`, logs, summaries, and model cards.
+- **Config-driven escape hatch** for users who want full control with YAML/JSON.
+- **Model-native formatting** via `format: "auto"` and tokenizer chat templates.
+- **Evaluation reports** with perplexity and base-vs-adapter generations.
+- **TRL-backed DPO** for preference tuning without leaving easylora configs.
+- **Portable adapters**: save, load, merge, and publish to Hugging Face Hub.
+
+## Quick example
+
+```python
+from easylora import autopilot_plan, autopilot_train
+
+plan = autopilot_plan(
+    model="meta-llama/Llama-3.2-1B",
+    dataset="tatsu-lab/alpaca",
+)
+print(plan.to_markdown())
+
+artifacts = autopilot_train(
+    model="meta-llama/Llama-3.2-1B",
+    dataset="tatsu-lab/alpaca",
+)
 ```
 
 ## What is LoRA / QLoRA?
@@ -52,6 +53,9 @@ fine-tuning of large models on consumer GPUs.
 ## Next Steps
 
 - [Quickstart guide](quickstart.md) for detailed setup instructions
+- [Autopilot guide](autopilot.md) for transparent planning
+- [Recipes](recipes.md) for copy-paste training scenarios
+- [Benchmarks](benchmarks.md) for reproducible speed and memory checks
 - [Configuration reference](configuration.md) for all available options
 - [CLI reference](cli.md) for command-line usage
 - [Model support](model-support.md) for supported architectures

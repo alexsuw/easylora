@@ -21,6 +21,14 @@ def eval_cmd(
         Optional[list[str]],
         typer.Option("--prompt", "-p", help="Prompts for generation sanity check"),
     ] = None,
+    output_report: Annotated[
+        Optional[Path],
+        typer.Option("--output-report", help="Write JSON or Markdown evaluation report"),
+    ] = None,
+    compare_base: Annotated[
+        bool,
+        typer.Option("--compare-base", help="Also generate samples from the base model"),
+    ] = False,
 ) -> None:
     """Evaluate a LoRA adapter (perplexity + optional generation)."""
     from easylora.config import DataConfig, ModelConfig
@@ -28,8 +36,9 @@ def eval_cmd(
     from easylora.data.loaders import load_dataset_any
     from easylora.eval.generate import generate_samples
     from easylora.eval.perplexity import compute_perplexity
+    from easylora.eval.report import build_eval_report, save_eval_report
     from easylora.lora.adapter import load_adapter
-    from easylora.utils.hf import load_tokenizer
+    from easylora.utils.hf import load_base_model, load_tokenizer
 
     console.print(f"[bold cyan]easylora eval[/] — model: {base_model}, adapter: {adapter_dir}")
 
@@ -52,9 +61,36 @@ def eval_cmd(
     if prompts:
         console.print("\n[bold]Generation samples:[/]")
         outputs = generate_samples(model, tokenizer, prompts)
-        for p, o in zip(prompts, outputs, strict=True):
+        base_outputs: list[str | None] = [None] * len(prompts)
+        if compare_base:
+            base = load_base_model(model_cfg)
+            base_outputs = generate_samples(base, tokenizer, prompts)
+        generations = []
+        for p, o, base_o in zip(prompts, outputs, base_outputs, strict=True):
             console.print(f"  [dim]Prompt:[/] {p}")
             console.print(f"  [green]Output:[/] {o}\n")
+            if base_o is not None:
+                console.print(f"  [blue]Base:[/] {base_o}\n")
+            generations.append(
+                {
+                    "prompt": p,
+                    "adapter_output": o,
+                    **({"base_output": base_o} if base_o is not None else {}),
+                }
+            )
+    else:
+        generations = []
+
+    if output_report:
+        report = build_eval_report(
+            base_model=base_model,
+            adapter_dir=str(adapter_dir),
+            dataset=dataset,
+            perplexity=ppl,
+            generations=generations,
+        )
+        report_path = save_eval_report(report, output_report)
+        console.print(f"\n[bold green]Evaluation report written to {report_path}[/]")
 
 
 def merge(

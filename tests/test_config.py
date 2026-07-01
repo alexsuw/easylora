@@ -10,9 +10,11 @@ import yaml
 from pydantic import ValidationError
 
 from easylora.config import (
+    DPOTrainConfig,
     DataConfig,
     ModelConfig,
     OutputConfig,
+    PreferenceDataConfig,
     TrainConfig,
     load_config,
 )
@@ -43,6 +45,15 @@ class TestModelConfig:
         assert cfg.load_in_4bit is True
         assert cfg.load_in_8bit is False
 
+    def test_optional_speed_flags(self):
+        cfg = ModelConfig(
+            base_model="gpt2",
+            attn_implementation="sdpa",
+            torch_compile=True,
+        )
+        assert cfg.attn_implementation == "sdpa"
+        assert cfg.torch_compile is True
+
 
 # ---------------------------------------------------------------------------
 # DataConfig
@@ -65,6 +76,24 @@ class TestDataConfig:
     def test_max_seq_len_bounds(self):
         with pytest.raises(ValidationError):
             DataConfig(dataset_path="d.json", max_seq_len=16)  # below minimum 32
+
+    def test_auto_format_allowed(self):
+        cfg = DataConfig(dataset_path="d.json", format="auto")
+        assert cfg.format == "auto"
+
+
+class TestDPOConfig:
+    def test_preference_data_requires_source(self):
+        with pytest.raises(ValidationError, match=r"dataset_path.*dataset_name"):
+            PreferenceDataConfig()
+
+    def test_dpo_train_config_defaults(self):
+        cfg = DPOTrainConfig(
+            model=ModelConfig(base_model="gpt2"),
+            data=PreferenceDataConfig(dataset_path="prefs.jsonl"),
+        )
+        assert cfg.data.prompt_field == "prompt"
+        assert cfg.dpo.beta == 0.1
 
 
 # ---------------------------------------------------------------------------

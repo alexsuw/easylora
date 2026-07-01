@@ -16,7 +16,7 @@ easylora doctor
 QLoRA (4-bit / 8-bit) requires the `bitsandbytes` package:
 
 ```bash
-pip install bitsandbytes
+pip install "easylora[qlora]"
 ```
 
 bitsandbytes requires a CUDA GPU. It does not work on CPU-only machines or

@@ -8,10 +8,12 @@ Usage::
     easylora doctor
     easylora inspect-targets --model ...
     easylora init-config --template sft-lora
+    easylora align dpo --config dpo.yaml
 """
 
 import typer
 
+from easylora.cli.align_cmd import app as align_app
 from easylora.cli.autopilot_cmd import app as autopilot_app
 from easylora.cli.doctor_cmd import doctor
 from easylora.cli.eval_cmd import eval_cmd, merge
@@ -33,6 +35,7 @@ app.command("doctor")(doctor)
 app.command("inspect-targets")(inspect_targets)
 app.command("init-config")(init_config)
 app.add_typer(autopilot_app, name="autopilot")
+app.add_typer(align_app, name="align")
 
 if __name__ == "__main__":
     app()

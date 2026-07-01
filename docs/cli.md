@@ -69,6 +69,7 @@ easylora autopilot plan [OPTIONS]
 | `--subset` | Dataset subset/config name |
 | `--split` | Dataset split (default: `train`) |
 | `--print-config` | Print resolved TrainConfig YAML |
+| `--save-report` | Write `autopilot_report.md` to `--output-dir` |
 
 **Example:**
 
@@ -77,6 +78,7 @@ easylora autopilot plan \
     --model meta-llama/Llama-3.2-1B \
     --dataset tatsu-lab/alpaca \
     --quality balanced \
+    --save-report \
     --print-config
 ```
 
@@ -96,6 +98,8 @@ easylora eval [OPTIONS]
 | `--max-samples` | Max samples to evaluate |
 | `--max-seq-len` | Max sequence length (default: 2048) |
 | `--prompt`, `-p` | Prompts for generation sanity check (repeatable) |
+| `--output-report` | Write JSON or Markdown evaluation report |
+| `--compare-base` | Also generate samples from the base model |
 
 **Example:**
 
@@ -104,8 +108,25 @@ easylora eval \
     --base-model meta-llama/Llama-3.2-1B \
     --adapter-dir ./output/adapter \
     --dataset eval_data.jsonl \
-    --prompt "What is machine learning?"
+    --prompt "What is machine learning?" \
+    --compare-base \
+    --output-report ./output/eval_report.md
 ```
+
+## `easylora align dpo`
+
+Run TRL-backed Direct Preference Optimization from an easylora config.
+
+```bash
+easylora align dpo --config dpo.yaml [--dry-run]
+```
+
+| Option | Description |
+|---|---|
+| `--config`, `-c` | Path to DPO YAML/JSON config |
+| `--dry-run` | Validate config without training |
+
+Install `easylora[align]` to add the TRL dependency.
 
 ## `easylora merge`
 

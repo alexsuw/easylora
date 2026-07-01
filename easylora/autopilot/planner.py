@@ -51,7 +51,7 @@ class AutopilotPlan:
 
     def to_pretty_lines(self) -> list[str]:
         gpu_display = self.hardware.gpu_name or "CPU/MPS"
-        return [
+        lines = [
             "AUTOPILOT PLAN",
             "",
             f"Model: {self.model.model_name}",
@@ -66,6 +66,80 @@ class AutopilotPlan:
             f"Estimated VRAM: ~{self.decision.estimated_vram_gb} GB",
             f"Estimated speed: ~{self.decision.estimated_steps_per_sec} steps/sec",
         ]
+        warnings = self.warnings()
+        if warnings:
+            lines.extend(["", "Warnings:", *[f"- {warning}" for warning in warnings]])
+        lines.extend(
+            [
+                "",
+                "Next steps:",
+                "- Review resolved_config.yaml before long runs.",
+                "- Run eval after training and publish the adapter card with this report.",
+            ]
+        )
+        return lines
+
+    def warnings(self) -> list[str]:
+        warnings: list[str] = []
+        if self.decision.use_qlora and not self.hardware.bitsandbytes_available:
+            warnings.append("QLoRA was selected, but bitsandbytes was not detected.")
+        if self.decision.use_qlora and not self.hardware.cuda_available:
+            warnings.append("QLoRA typically requires CUDA; CPU/MPS runs may fail or be very slow.")
+        if self.decision.estimated_vram_gb and self.hardware.gpu_vram_gb:
+            if self.decision.estimated_vram_gb > self.hardware.gpu_vram_gb:
+                warnings.append("Estimated VRAM exceeds detected GPU memory; lower quality or seq length.")
+        if self.dataset.p95_tokens > self.decision.max_seq_len:
+            warnings.append("Some examples exceed the selected sequence length and will be truncated.")
+        return warnings
+
+    def to_markdown(self) -> str:
+        """Render a shareable markdown report for issues, PRs, and model cards."""
+        gpu_display = self.hardware.gpu_name or "CPU/MPS"
+        rows = [
+            ("Model", self.model.model_name),
+            ("Dataset examples", f"{self.dataset.examples:,}"),
+            ("Dataset format", self.dataset.inferred_format),
+            ("GPU", gpu_display),
+            ("Strategy", "QLoRA" if self.decision.use_qlora else "LoRA"),
+            ("Sequence length", str(self.decision.max_seq_len)),
+            ("Batch size", str(self.decision.batch_size)),
+            ("Gradient accumulation", str(self.decision.grad_accum)),
+            ("Learning rate", f"{self.decision.learning_rate:.2e}"),
+            ("Estimated VRAM", f"~{self.decision.estimated_vram_gb} GB"),
+            ("Estimated speed", f"~{self.decision.estimated_steps_per_sec} steps/sec"),
+        ]
+        lines = [
+            "# easylora Autopilot Report",
+            "",
+            "## Summary",
+            "",
+            "| Field | Value |",
+            "|---|---|",
+            *[f"| {key} | {value} |" for key, value in rows],
+            "",
+            "## Reasoning",
+            "",
+            *[f"- {reason}" for reason in self.decision.reasons],
+        ]
+        warnings = self.warnings()
+        if warnings:
+            lines.extend(["", "## Warnings", "", *[f"- {warning}" for warning in warnings]])
+        lines.extend(
+            [
+                "",
+                "## Reproduce",
+                "",
+                "```bash",
+                (
+                    "easylora train --autopilot "
+                    f"--model {self.model.model_name} "
+                    "--dataset <dataset> "
+                    f"--quality {self.quality}"
+                ),
+                "```",
+            ]
+        )
+        return "\n".join(lines) + "\n"
 
 
 def plan_autopilot(

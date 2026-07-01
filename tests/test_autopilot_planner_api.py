@@ -92,6 +92,8 @@ def test_autopilot_train_writes_report_and_resolved_config(monkeypatch, tmp_path
     assert Path(artifacts.summary_path).name == "summary.json"
     assert (out / "resolved_config.yaml").exists()
     assert (out / "autopilot_report.json").exists()
+    assert (out / "autopilot_report.md").exists()
+    assert "easylora Autopilot Report" in (out / "autopilot_report.md").read_text()
 
 
 def _make_test_plan(output_dir: str) -> AutopilotPlan:

@@ -33,6 +33,7 @@ def format_examples(
     """Tokenise a dataset according to the chosen format.
 
     Supported formats:
+    - ``"auto"``:   infer chatml/alpaca/raw from dataset columns.
     - ``"raw"``:    uses ``data_config.text_field`` as pre-formatted text.
     - ``"alpaca"``: expects ``instruction``, optional ``input``, ``output`` columns.
     - ``"chatml"``: expects a ``messages`` column with role/content dicts.
@@ -40,7 +41,7 @@ def format_examples(
     Returns a new ``Dataset`` with ``input_ids``, ``attention_mask``, and
     ``labels`` columns ready for causal-LM training.
     """
-    fmt = data_config.format
+    fmt = _resolve_format(data_config.format, dataset.column_names, data_config.text_field)
 
     if fmt == "raw":
         fn = _build_raw_mapper(tokenizer, data_config)
@@ -64,6 +65,22 @@ def format_examples(
         data_config.max_seq_len,
     )
     return tokenized
+
+
+def _resolve_format(requested: str, columns: list[str], text_field: str) -> str:
+    if requested != "auto":
+        return requested
+    column_set = set(columns)
+    if "messages" in column_set:
+        return "chatml"
+    if {"instruction", "output"}.issubset(column_set):
+        return "alpaca"
+    if text_field in column_set:
+        return "raw"
+    raise ValueError(
+        "Could not infer dataset format. Expected a 'messages' column, "
+        "'instruction'+'output' columns, or the configured raw text field."
+    )
 
 
 def _build_raw_mapper(

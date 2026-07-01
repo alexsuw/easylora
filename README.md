@@ -5,21 +5,36 @@
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
 
-**Batteries-included toolkit for LoRA / QLoRA fine-tuning** with Hugging Face Transformers.
+**Zero-config Autopilot for LoRA / QLoRA fine-tuning.**
 
-Fine-tune any causal language model with LoRA in under 20 lines of Python, or with a single CLI command.
+Fine-tune a Hugging Face causal LM with one command. easylora profiles your
+hardware, model, and dataset, chooses safe LoRA/QLoRA settings, then writes a
+shareable report explaining every decision.
+
+```bash
+easylora train --autopilot \
+  --model meta-llama/Llama-3.2-1B \
+  --dataset tatsu-lab/alpaca \
+  --quality balanced
+```
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/alexsuw/easylora/blob/main/notebooks/quickstart_colab.ipynb)
 
-## What is LoRA / QLoRA?
+## Why easylora?
 
-**LoRA** (Low-Rank Adaptation) freezes pre-trained model weights and injects small trainable rank-decomposition matrices, reducing trainable parameters by orders of magnitude.
+LoRA tooling is crowded. easylora focuses on the beginner-to-production gap:
+fast first run, transparent decisions, reproducible artifacts, and a path to
+alignment/evaluation without switching config systems.
 
-**QLoRA** adds 4-bit quantisation on top of LoRA, enabling fine-tuning of large models on consumer GPUs.
+| If you need... | Use... | easylora angle |
+|---|---|---|
+| Fastest custom kernels | Unsloth | Optional backend target; Autopilot stays backend-neutral |
+| Large YAML pipelines | Axolotl | Simpler no-config start, still exports YAML |
+| Broad UI workflow | LLaMA-Factory | CLI/Python-first, report-first workflow |
+| Reference alignment algorithms | TRL | TRL-backed DPO under easylora configs |
+| A safe first adapter quickly | easylora | One command + explainable Autopilot report |
 
-easylora wraps `transformers` + `peft` with safe defaults, reproducibility, and a clean config-driven API.
-
-## Installation
+## Install
 
 ```bash
 pip install easylora
@@ -28,85 +43,61 @@ pip install easylora
 Optional extras:
 
 ```bash
-pip install "easylora[qlora]"   # adds bitsandbytes for 4-bit/8-bit quantisation
-pip install "easylora[wandb]"   # adds Weights & Biases logging
-pip install "easylora[dev]"     # adds ruff, pyright, pytest, mkdocs, pre-commit
+pip install "easylora[qlora]"   # bitsandbytes for CUDA 4-bit/8-bit quantisation
+pip install "easylora[align]"   # TRL for DPO preference tuning
+pip install "easylora[wandb]"   # Weights & Biases logging
+pip install "easylora[dev]"     # tests, linting, typing, docs
 pip install "easylora[all]"     # everything
 ```
 
-For development from source:
+## Autopilot output
+
+Autopilot generates a validated `TrainConfig`, runs the normal trainer, and
+saves a reproducibility bundle:
+
+```
+output/
+  adapter/                # PEFT adapter weights
+  resolved_config.yaml    # full resolved config
+  autopilot_report.json   # machine-readable hardware/model/dataset decisions
+  autopilot_report.md     # shareable human-readable report
+  train_config.json
+  train_log.jsonl
+  summary.json
+  metadata.json
+```
+
+Preview the plan without training:
 
 ```bash
-git clone https://github.com/alexsuw/easylora.git
-cd easylora
-pip install -e ".[dev]"
-```
-
-## Quickstart (Python)
-
-```python
-from easylora import train, TrainConfig
-from easylora.config import ModelConfig, DataConfig
-
-config = TrainConfig(
-    model=ModelConfig(base_model="meta-llama/Llama-3.2-1B"),
-    data=DataConfig(
-        dataset_name="tatsu-lab/alpaca",
-        format="alpaca",
-        max_seq_len=2048,
-    ),
-)
-artifacts = train(config)
-print(f"Adapter saved to: {artifacts.adapter_dir}")
-```
-
-### QLoRA (4-bit)
-
-```python
-config = TrainConfig(
-    model=ModelConfig(base_model="meta-llama/Llama-3.2-1B", load_in_4bit=True),
-    data=DataConfig(dataset_name="tatsu-lab/alpaca", format="alpaca"),
-)
-artifacts = train(config)
-```
-
-## Quickstart (CLI)
-
-```bash
-# Generate a starter config
-easylora init-config --template sft-lora
-
-# Train
-easylora train --config easylora_config.yaml
-
-# Train with autopilot (no config file)
-easylora train \
-  --autopilot \
-  --model meta-llama/Llama-3.2-1B \
-  --dataset tatsu-lab/alpaca
-
-# Validate config without training
-easylora train --config config.yaml --dry-run
-
-# Plan autopilot choices without training
 easylora autopilot plan \
   --model meta-llama/Llama-3.2-1B \
   --dataset tatsu-lab/alpaca \
-  --quality balanced
-
-# Evaluate
-easylora eval --base-model meta-llama/Llama-3.2-1B --adapter-dir ./output/adapter --dataset eval.jsonl
-
-# Merge adapter into base model
-easylora merge --base-model meta-llama/Llama-3.2-1B --adapter-dir ./output/adapter --output-dir ./merged
-
-# Check environment
-easylora doctor
+  --quality balanced \
+  --save-report
 ```
 
-## Config Reference
+Python API:
 
-Config files use YAML or JSON. See the [full reference](https://alexsuw.github.io/easylora/configuration/).
+```python
+from easylora import autopilot_plan, autopilot_train
+
+plan = autopilot_plan(
+    model="meta-llama/Llama-3.2-1B",
+    dataset="tatsu-lab/alpaca",
+    quality="balanced",
+)
+print(plan.to_markdown())
+
+artifacts = autopilot_train(
+    model="meta-llama/Llama-3.2-1B",
+    dataset="tatsu-lab/alpaca",
+)
+```
+
+## Config-driven training
+
+You can still own every knob with YAML/JSON:
 
 ```yaml
 model:
@@ -114,7 +105,7 @@ model:
   torch_dtype: "auto"
 data:
   dataset_name: "tatsu-lab/alpaca"
-  format: "alpaca"
+  format: "auto"
   max_seq_len: 2048
 lora:
   r: 16
@@ -124,110 +115,81 @@ training:
   epochs: 3
   batch_size: 4
   grad_accum: 4
-  gradient_checkpointing: true
 output:
   output_dir: "./output"
 repro:
   seed: 42
 ```
 
-## Autopilot Training
-
-Autopilot generates a full `TrainConfig` from minimal inputs, then runs the existing training
-pipeline unchanged.
-
-```python
-from easylora import autopilot_plan, autopilot_train
-
-plan = autopilot_plan(
-    model="meta-llama/Llama-3.2-1B",
-    dataset="tatsu-lab/alpaca",
-    quality="balanced",  # fast | balanced | high
-)
-print(plan.to_pretty_lines())
-
-artifacts = autopilot_train(
-    model="meta-llama/Llama-3.2-1B",
-    dataset="tatsu-lab/alpaca",
-)
+```bash
+easylora train --config config.yaml
 ```
 
-When autopilot is used, easylora also saves:
+## Evaluation, merge, and alignment
 
-- `resolved_config.yaml` — full resolved configuration used for training
-- `autopilot_report.json` — hardware profile, dataset/model analysis, chosen values, and reasoning
+```bash
+# Evaluate and save a markdown report
+easylora eval \
+  --base-model meta-llama/Llama-3.2-1B \
+  --adapter-dir ./output/adapter \
+  --dataset eval.jsonl \
+  --prompt "Explain LoRA in one sentence." \
+  --compare-base \
+  --output-report ./output/eval_report.md
 
-## Model Compatibility
+# Merge adapter into a standalone model
+easylora merge \
+  --base-model meta-llama/Llama-3.2-1B \
+  --adapter-dir ./output/adapter \
+  --output-dir ./merged
 
-easylora auto-detects LoRA target modules for 16+ architectures:
-
-| Family | Models |
-|---|---|
-| LLaMA | LLaMA 1/2/3, Code Llama, Vicuna |
-| Mistral | Mistral, Mixtral |
-| Qwen | Qwen, Qwen2 |
-| Google | Gemma, Gemma 2 |
-| Microsoft | Phi-2, Phi-3 |
-| Others | Falcon, GPT-NeoX, Pythia, MPT, Bloom, OPT, GPT-2, StarCoder |
-
-For unknown architectures, easylora scans the model for `nn.Linear` layers and selects attention-like modules automatically. Use `easylora inspect-targets --model <id>` to preview what would be selected.
-
-## Merging Adapters
-
-```python
-from easylora import merge_adapter
-
-merge_adapter(
-    base_model_name_or_path="meta-llama/Llama-3.2-1B",
-    adapter_dir="./output/adapter",
-    output_dir="./merged_model",
-)
+# Preference tuning via TRL-backed DPO
+easylora align dpo --config examples/recipes/dpo_preference.yaml
 ```
 
-The merged model loads with `AutoModelForCausalLM.from_pretrained` without PEFT.
-
-## Dataset Formats
+## Dataset formats
 
 | Format | Columns | Description |
 |---|---|---|
+| `auto` | inferred | Chooses `chatml`, `alpaca`, or `raw` from columns |
 | `raw` | `text` | Single text field for language modelling |
-| `alpaca` | `instruction`, `input` (optional), `output` | Instruction-following with prompt masking |
-| `chatml` | `messages` | Chat messages with role/content dicts |
+| `alpaca` | `instruction`, optional `input`, `output` | Instruction SFT with prompt masking |
+| `chatml` | `messages` | Uses the tokenizer's chat template |
 
-## Output Artifacts
+## Model support
 
-```
-output/
-  adapter/           # LoRA adapter weights
-  train_config.json  # Config used for this run
-  train_log.jsonl    # Step-by-step training metrics
-  summary.json       # Final loss, steps, runtime
-  metadata.json      # Base model, versions, timestamp
-  logs.jsonl         # Application logs
-```
-
-## Troubleshooting
-
-| Issue | Solution |
-|---|---|
-| `bitsandbytes not installed` | `pip install bitsandbytes` (CUDA required) |
-| CUDA OOM | Reduce `batch_size`, increase `grad_accum`, enable `gradient_checkpointing`, use QLoRA |
-| `pad_token was None` | Handled automatically (set to `eos_token`) |
-| Output dir exists | Use `--force` or `allow_overwrite: true` |
-
-Run `easylora doctor` for environment diagnostics.
-
-## Running Tests
+easylora auto-detects LoRA target modules for LLaMA, Mistral/Mixtral, Qwen,
+Gemma, Phi, Falcon, GPT-NeoX, Pythia, MPT, Bloom, OPT, GPT-2, StarCoder, and
+other causal LM architectures. For unknown models, it scans `nn.Linear` modules
+and selects attention-like targets.
 
 ```bash
+easylora inspect-targets --model meta-llama/Llama-3.2-1B
+```
+
+## Learn more
+
+- [Quickstart](https://alexsuw.github.io/easylora/quickstart/)
+- [Autopilot guide](https://alexsuw.github.io/easylora/autopilot/)
+- [Recipes](https://alexsuw.github.io/easylora/recipes/)
+- [Benchmarks](https://alexsuw.github.io/easylora/benchmarks/)
+- [Configuration reference](https://alexsuw.github.io/easylora/configuration/)
+
+## Development
+
+```bash
+git clone https://github.com/alexsuw/easylora.git
+cd easylora
 pip install -e ".[dev]"
-make test          # fast tests
-make test-slow     # includes smoke training
+make test
+make lint
+make type
 ```
 
 ## Contributing
 
-Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup, code style, and the PR process.
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup,
+code style, and the PR process.
 
 ## License
 
