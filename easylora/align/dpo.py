@@ -16,8 +16,8 @@ from easylora.utils.seed import set_seed
 def train_dpo(config: DPOTrainConfig) -> RunArtifacts:
     """Run a TRL-backed DPO training job with easylora configs and artifacts."""
     try:
-        from trl import DPOTrainer
         from trl import DPOConfig as TRLDPOConfig
+        from trl import DPOTrainer
     except ImportError as exc:
         raise EasyLoRADependencyError(package="trl", feature="DPO alignment") from exc
 

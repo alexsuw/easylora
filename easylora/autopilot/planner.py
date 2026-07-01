@@ -85,11 +85,18 @@ class AutopilotPlan:
             warnings.append("QLoRA was selected, but bitsandbytes was not detected.")
         if self.decision.use_qlora and not self.hardware.cuda_available:
             warnings.append("QLoRA typically requires CUDA; CPU/MPS runs may fail or be very slow.")
-        if self.decision.estimated_vram_gb and self.hardware.gpu_vram_gb:
-            if self.decision.estimated_vram_gb > self.hardware.gpu_vram_gb:
-                warnings.append("Estimated VRAM exceeds detected GPU memory; lower quality or seq length.")
+        if (
+            self.decision.estimated_vram_gb
+            and self.hardware.gpu_vram_gb
+            and self.decision.estimated_vram_gb > self.hardware.gpu_vram_gb
+        ):
+            warnings.append(
+                "Estimated VRAM exceeds detected GPU memory; lower quality or seq length."
+            )
         if self.dataset.p95_tokens > self.decision.max_seq_len:
-            warnings.append("Some examples exceed the selected sequence length and will be truncated.")
+            warnings.append(
+                "Some examples exceed the selected sequence length and will be truncated."
+            )
         return warnings
 
     def to_markdown(self) -> str:

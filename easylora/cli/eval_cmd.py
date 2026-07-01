@@ -1,7 +1,7 @@
 """CLI ``eval`` and ``merge`` subcommands."""
 
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Optional, cast
 
 import typer
 from rich.console import Console
@@ -64,7 +64,7 @@ def eval_cmd(
         base_outputs: list[str | None] = [None] * len(prompts)
         if compare_base:
             base = load_base_model(model_cfg)
-            base_outputs = generate_samples(base, tokenizer, prompts)
+            base_outputs = cast(list[str | None], generate_samples(base, tokenizer, prompts))
         generations = []
         for p, o, base_o in zip(prompts, outputs, base_outputs, strict=True):
             console.print(f"  [dim]Prompt:[/] {p}")

@@ -13,7 +13,6 @@ from easylora.autopilot.planner import AutopilotPlan
 from easylora.cli.main import app
 from easylora.config import TrainConfig
 
-
 runner = CliRunner()
 
 

@@ -10,8 +10,8 @@ import yaml
 from pydantic import ValidationError
 
 from easylora.config import (
-    DPOTrainConfig,
     DataConfig,
+    DPOTrainConfig,
     ModelConfig,
     OutputConfig,
     PreferenceDataConfig,
