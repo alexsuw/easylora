@@ -57,6 +57,8 @@ object (Pydantic v2) which can be loaded from YAML or JSON files.
 | `load_in_4bit` | bool | `false` | QLoRA 4-bit quantisation |
 | `load_in_8bit` | bool | `false` | 8-bit quantisation |
 | `device_map` | str | `"auto"` | Device placement strategy |
+| `attn_implementation` | str | `"auto"` | `"auto"`, `"eager"`, `"sdpa"`, or `"flash_attention_2"` |
+| `torch_compile` | bool | `false` | Compile model with `torch.compile` when supported |
 
 !!! warning "Quantisation exclusivity"
     `load_in_4bit` and `load_in_8bit` are mutually exclusive. Setting both
@@ -71,13 +73,17 @@ object (Pydantic v2) which can be loaded from YAML or JSON files.
 | `subset` | str | null | Dataset subset/config name |
 | `split` | str | `"train"` | Dataset split |
 | `text_field` | str | `"text"` | Column name for raw format |
-| `format` | str | `"raw"` | `"raw"`, `"alpaca"`, or `"chatml"` |
+| `format` | str | `"raw"` | `"auto"`, `"raw"`, `"alpaca"`, or `"chatml"` |
 | `max_seq_len` | int | `2048` | Maximum sequence length (32--131072) |
 | `val_split_ratio` | float | `0.0` | Fraction for validation split |
 
 !!! note "Dataset source"
     You must provide either `dataset_path` (local file) or `dataset_name`
     (HF hub). Providing neither raises a validation error.
+
+!!! tip "Use format: auto"
+    `format: "auto"` infers `chatml` from a `messages` column, `alpaca`
+    from `instruction`/`output`, and `raw` from the configured text field.
 
 ### `lora` -- LoRAConfig
 
@@ -132,6 +138,32 @@ object (Pydantic v2) which can be loaded from YAML or JSON files.
 |---|---|---|---|
 | `seed` | int | `42` | Random seed |
 | `deterministic` | bool | `false` | Fully deterministic mode |
+
+## DPO Preference Config
+
+`easylora align dpo` uses `DPOTrainConfig`, which mirrors `TrainConfig` but
+replaces `data` with preference fields and adds a `dpo` section.
+
+```yaml
+model:
+  base_model: "meta-llama/Llama-3.2-1B"
+data:
+  dataset_path: "preferences.jsonl"
+  prompt_field: "prompt"
+  chosen_field: "chosen"
+  rejected_field: "rejected"
+dpo:
+  beta: 0.1
+training:
+  epochs: 1
+  batch_size: 2
+  grad_accum: 8
+output:
+  output_dir: "./output/dpo"
+```
+
+Preference datasets must contain prompt/chosen/rejected columns. Install
+`easylora[align]` to add the TRL backend.
 
 ## Loading Configs in Python
 

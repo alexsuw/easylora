@@ -1,0 +1,33 @@
+# Tiny smoke config for validating installation and config parsing.
+model:
+  base_model: "hf-internal-testing/tiny-random-LlamaForCausalLM"
+  torch_dtype: "fp32"
+  device_map: null
+
+data:
+  dataset_path: "examples/recipes/local_chatml.jsonl"
+  format: "auto"
+  max_seq_len: 128
+
+lora:
+  r: 4
+  alpha: 8
+  target_modules: ["q_proj", "v_proj"]
+
+optim:
+  lr: 1e-4
+
+training:
+  epochs: 1
+  batch_size: 1
+  grad_accum: 1
+  max_steps: 2
+  logging_steps: 1
+  gradient_checkpointing: false
+
+output:
+  output_dir: "./output/tiny-smoke"
+  allow_overwrite: true
+
+repro:
+  seed: 42

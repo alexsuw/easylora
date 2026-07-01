@@ -31,6 +31,17 @@ class ModelConfig(BaseModel):
     load_in_4bit: bool = False
     load_in_8bit: bool = False
     device_map: str | dict[str, Any] | None = "auto"
+    attn_implementation: Literal["auto", "eager", "sdpa", "flash_attention_2"] = Field(
+        "auto",
+        description=(
+            "Attention backend passed to Transformers. Use flash_attention_2 only when "
+            "FlashAttention is installed and supported by the model."
+        ),
+    )
+    torch_compile: bool = Field(
+        False,
+        description="Compile the loaded model with torch.compile for supported training runs.",
+    )
 
     @model_validator(mode="after")
     def _check_quantisation_exclusivity(self) -> ModelConfig:
@@ -49,7 +60,7 @@ class DataConfig(BaseModel):
     subset: str | None = None
     split: str = "train"
     text_field: str = "text"
-    format: Literal["alpaca", "chatml", "raw"] = "raw"
+    format: Literal["auto", "alpaca", "chatml", "raw"] = "raw"
     max_seq_len: int = Field(2048, ge=32, le=131072)
     val_split_ratio: float = Field(0.0, ge=0.0, lt=1.0)
 
@@ -137,6 +148,44 @@ class ReproConfig(BaseModel):
     deterministic: bool = False
 
 
+class PreferenceDataConfig(BaseModel):
+    """Preference dataset settings for DPO-style alignment."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    dataset_path: str | None = Field(None, description="Local JSON/JSONL/CSV/Parquet file")
+    dataset_name: str | None = Field(None, description="HuggingFace Datasets hub identifier")
+    subset: str | None = None
+    split: str = "train"
+    prompt_field: str = "prompt"
+    chosen_field: str = "chosen"
+    rejected_field: str = "rejected"
+    max_prompt_len: int = Field(1024, ge=32, le=131072)
+    max_seq_len: int = Field(2048, ge=32, le=131072)
+    val_split_ratio: float = Field(0.0, ge=0.0, lt=1.0)
+
+    @model_validator(mode="after")
+    def _check_dataset_source(self) -> PreferenceDataConfig:
+        if not self.dataset_path and not self.dataset_name:
+            raise ValueError(
+                "Provide either 'dataset_path' (local file) or 'dataset_name' (HF hub)."
+            )
+        return self
+
+
+class DPOConfig(BaseModel):
+    """Direct Preference Optimization settings."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    beta: float = Field(0.1, gt=0, description="DPO beta coefficient")
+    max_steps: int = Field(-1, description="-1 means use epochs")
+    reference_model: str | None = Field(
+        None,
+        description="Optional reference model ID/path. Defaults to base_model.",
+    )
+
+
 class TrainConfig(BaseModel):
     """Top-level training configuration that nests all sub-configs."""
 
@@ -147,6 +196,21 @@ class TrainConfig(BaseModel):
     lora: LoRAConfig = LoRAConfig()
     optim: OptimConfig = OptimConfig()
     training: TrainLoopConfig = TrainLoopConfig()
+    output: OutputConfig = OutputConfig()
+    repro: ReproConfig = ReproConfig()
+
+
+class DPOTrainConfig(BaseModel):
+    """Top-level configuration for DPO preference tuning."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    model: ModelConfig
+    data: PreferenceDataConfig
+    lora: LoRAConfig = LoRAConfig()
+    optim: OptimConfig = OptimConfig()
+    training: TrainLoopConfig = TrainLoopConfig()
+    dpo: DPOConfig = DPOConfig()
     output: OutputConfig = OutputConfig()
     repro: ReproConfig = ReproConfig()
 

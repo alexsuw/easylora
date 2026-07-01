@@ -66,6 +66,18 @@ def generate_model_card(
 
     lines.extend(
         [
+            "## Reproducibility Artifacts",
+            "",
+            "When this adapter is trained with `easylora train --autopilot`, publish",
+            "`resolved_config.yaml`, `autopilot_report.json`, and",
+            "`autopilot_report.md` alongside the adapter. For evaluation, attach",
+            "the JSON or Markdown report produced by `easylora eval --output-report`.",
+            "",
+        ]
+    )
+
+    lines.extend(
+        [
             "## Usage",
             "",
             "```python",

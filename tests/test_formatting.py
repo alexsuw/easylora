@@ -44,6 +44,12 @@ class TestRawFormat:
         result = format_examples(ds, cfg, tokenizer)
         assert len(result[0]["input_ids"]) <= 32
 
+    def test_auto_infers_raw(self, tokenizer):
+        ds = Dataset.from_dict({"text": ["Hello world"]})
+        cfg = DataConfig(dataset_path="dummy.json", format="auto", max_seq_len=64)
+        result = format_examples(ds, cfg, tokenizer)
+        assert result[0]["input_ids"] == result[0]["labels"]
+
 
 # ---------------------------------------------------------------------------
 # Alpaca format
@@ -81,6 +87,18 @@ class TestAlpacaFormat:
         result = format_examples(ds, cfg, tokenizer)
         assert len(result[0]["input_ids"]) > 0
 
+    def test_auto_infers_alpaca(self, tokenizer):
+        ds = Dataset.from_dict(
+            {
+                "instruction": ["Say hello."],
+                "input": [""],
+                "output": ["Hello!"],
+            }
+        )
+        cfg = DataConfig(dataset_path="dummy.json", format="auto", max_seq_len=256)
+        result = format_examples(ds, cfg, tokenizer)
+        assert -100 in result[0]["labels"]
+
 
 # ---------------------------------------------------------------------------
 # ChatML format
@@ -115,3 +133,24 @@ class TestChatMLFormat:
         labels = result[0]["labels"]
         # Prompt (user turn) should be masked
         assert -100 in labels
+
+    def test_auto_infers_chatml(self, tokenizer):
+        if tokenizer.chat_template is None:
+            tokenizer.chat_template = (
+                "{% for message in messages %}"
+                "{{ message['role'] }}: {{ message['content'] }}\n"
+                "{% endfor %}"
+            )
+        ds = Dataset.from_dict(
+            {
+                "messages": [
+                    [
+                        {"role": "user", "content": "Hi"},
+                        {"role": "assistant", "content": "Hello!"},
+                    ]
+                ]
+            }
+        )
+        cfg = DataConfig(dataset_path="dummy.json", format="auto", max_seq_len=256)
+        result = format_examples(ds, cfg, tokenizer)
+        assert "input_ids" in result.column_names

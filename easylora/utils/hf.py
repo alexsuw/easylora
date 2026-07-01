@@ -67,6 +67,8 @@ def load_base_model(model_config: ModelConfig) -> PreTrainedModel:
         "trust_remote_code": model_config.trust_remote_code,
         "device_map": model_config.device_map,
     }
+    if model_config.attn_implementation != "auto":
+        kwargs["attn_implementation"] = model_config.attn_implementation
 
     if quant_config is not None:
         kwargs["quantization_config"] = quant_config
@@ -74,7 +76,17 @@ def load_base_model(model_config: ModelConfig) -> PreTrainedModel:
         kwargs["torch_dtype"] = _resolve_dtype(model_config.torch_dtype)
 
     model = AutoModelForCausalLM.from_pretrained(**kwargs)
-    logger.info("Loaded base model: %s  (dtype=%s)", model_config.base_model, model.dtype)
+    if model_config.torch_compile:
+        try:
+            model = torch.compile(model)  # type: ignore[assignment]
+            logger.info("Enabled torch.compile for %s", model_config.base_model)
+        except Exception as exc:
+            logger.warning("torch.compile failed; continuing without compilation: %s", exc)
+    logger.info(
+        "Loaded base model: %s  (dtype=%s)",
+        model_config.base_model,
+        getattr(model, "dtype", "unknown"),
+    )
     return model
 
 

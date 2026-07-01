@@ -27,8 +27,12 @@ theme:
 nav:
   - Home: index.md
   - Quickstart: quickstart.md
+  - Autopilot: autopilot.md
+  - Recipes: recipes.md
+  - Benchmarks: benchmarks.md
   - Configuration: configuration.md
   - CLI Reference: cli.md
+  - API Reference: api.md
   - Adapters: adapters.md
   - Model Support: model-support.md
   - Troubleshooting: troubleshooting.md
@@ -47,3 +51,9 @@ markdown_extensions:
 
 plugins:
   - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: false

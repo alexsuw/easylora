@@ -98,6 +98,9 @@ def train(
             console.print("[bold cyan]Dry run[/] — autopilot plan generated successfully.\n")
             for line in plan.to_pretty_lines():
                 console.print(line)
+            console.print("\n[bold]Reasoning:[/]")
+            for reason in plan.decision.reasons:
+                console.print(f"  - {reason}")
             console.print("\n[dim]No training performed.[/dim]")
             raise typer.Exit(0)
 
@@ -120,6 +123,7 @@ def train(
             f"[bold]Log:[/]      {artifacts.log_path}\n"
             f"[bold]Summary:[/]  {artifacts.summary_path}\n"
             f"[bold]Autopilot:[/] {Path(output_dir) / 'autopilot_report.json'}\n"
+            f"[bold]Report:[/]   {Path(output_dir) / 'autopilot_report.md'}\n"
             f"[bold]Resolved:[/]  {Path(output_dir) / 'resolved_config.yaml'}\n"
             f"\n[dim]Next steps:[/dim]\n"
             f"  easylora eval -m {base_model} -a {adapter} -d <eval_data>\n"

@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Autopilot-first documentation, recipes, Python examples, and Colab quickstart updates.
+- Shareable `autopilot_report.md` output and richer Autopilot CLI planning tables.
+- `format: "auto"` dataset formatting for raw, Alpaca, and tokenizer chat-template data.
+- Structured eval reports via `easylora eval --output-report`.
+- TRL-backed `easylora align dpo` entrypoint and DPO configuration schema.
+- Benchmark script and benchmark documentation for Autopilot estimate calibration.
+- MkDocs API reference, PEP 561 `py.typed` marker, coverage reporting, and additional
+  CLI/eval/merge tests.
+
+### Changed
+
+- Made `bitsandbytes` a true optional dependency through `easylora[qlora]`.
+- Added optional `attn_implementation` and `torch_compile` model loading flags.
+- Refreshed package metadata in `CITATION.cff` and the security support matrix.
+
 ## [0.2.1] - 2026-02-28
 
 ### Fixed

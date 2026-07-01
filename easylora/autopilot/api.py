@@ -71,6 +71,16 @@ def autopilot_train(
     return artifacts
 
 
+def save_autopilot_report(plan: AutopilotPlan, output_dir: str | Path) -> Path:
+    """Save a markdown Autopilot report and return its path."""
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+    report_path = output_path / "autopilot_report.md"
+    report_path.write_text(plan.to_markdown(), encoding="utf-8")
+    return report_path
+
+
 def _save_autopilot_artifacts(plan: AutopilotPlan, output_dir: Path) -> None:
     save_yaml(plan.config.model_dump(), output_dir / "resolved_config.yaml")
     save_json(plan.report(), output_dir / "autopilot_report.json")
+    save_autopilot_report(plan, output_dir)

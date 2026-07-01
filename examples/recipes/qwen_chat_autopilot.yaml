@@ -1,0 +1,36 @@
+# Chat SFT recipe using tokenizer-native chat templates.
+model:
+  base_model: "Qwen/Qwen2.5-3B-Instruct"
+  torch_dtype: "auto"
+
+data:
+  dataset_path: "examples/recipes/local_chatml.jsonl"
+  format: "auto"
+  max_seq_len: 2048
+  val_split_ratio: 0.0
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: "auto"
+
+optim:
+  lr: 2e-4
+  warmup_ratio: 0.03
+  scheduler: "cosine"
+
+training:
+  epochs: 1
+  batch_size: 1
+  grad_accum: 16
+  logging_steps: 5
+  save_steps: 100
+  gradient_checkpointing: true
+
+output:
+  output_dir: "./output/qwen-chat-lora"
+  run_name: "qwen-chat-lora"
+
+repro:
+  seed: 42

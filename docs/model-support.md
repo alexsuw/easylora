@@ -75,7 +75,7 @@ To add support for a new model architecture:
 QLoRA requires the `bitsandbytes` library:
 
 ```bash
-pip install bitsandbytes
+pip install "easylora[qlora]"
 ```
 
 Enable via config:

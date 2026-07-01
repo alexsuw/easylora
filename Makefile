@@ -5,7 +5,7 @@ install-dev:
 	pre-commit install
 
 test:
-	pytest -q -m "not slow"
+	pytest -q -m "not slow" --cov=easylora --cov-report=term-missing --cov-report=xml
 
 test-slow:
 	pytest -q

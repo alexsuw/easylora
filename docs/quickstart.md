@@ -6,10 +6,10 @@
 pip install easylora
 ```
 
-For QLoRA (4-bit quantisation), also install bitsandbytes:
+For QLoRA (4-bit quantisation on CUDA), install the optional extra:
 
 ```bash
-pip install bitsandbytes
+pip install "easylora[qlora]"
 ```
 
 For development:
@@ -20,19 +20,62 @@ cd easylora
 pip install -e ".[dev]"
 ```
 
+## Autopilot first
+
+Preview the training plan without touching model weights:
+
+```bash
+easylora autopilot plan \
+    --model meta-llama/Llama-3.2-1B \
+    --dataset tatsu-lab/alpaca \
+    --quality balanced \
+    --save-report
+```
+
+Run the same plan:
+
+```bash
+easylora train \
+    --autopilot \
+    --model meta-llama/Llama-3.2-1B \
+    --dataset tatsu-lab/alpaca \
+    --quality balanced
+```
+
+Autopilot saves `resolved_config.yaml`, `autopilot_report.json`, and
+`autopilot_report.md` next to the adapter.
+
 ## Python API
 
-### Minimal Training
+### Autopilot
+
+```python
+from easylora import autopilot_plan, autopilot_train
+
+plan = autopilot_plan(
+    model="meta-llama/Llama-3.2-1B",
+    dataset="tatsu-lab/alpaca",
+    quality="balanced",
+)
+print(plan.to_markdown())
+
+artifacts = autopilot_train(
+    model="meta-llama/Llama-3.2-1B",
+    dataset="tatsu-lab/alpaca",
+)
+```
+
+### Manual config
 
 ```python
 from easylora import train, TrainConfig
-from easylora.config import ModelConfig, DataConfig
+from easylora.config import DataConfig, ModelConfig
 
 config = TrainConfig(
     model=ModelConfig(base_model="meta-llama/Llama-3.2-1B"),
     data=DataConfig(
         dataset_name="tatsu-lab/alpaca",
-        format="alpaca",
+        format="auto",
         max_seq_len=2048,
     ),
 )
@@ -48,31 +91,9 @@ config = TrainConfig(
         base_model="meta-llama/Llama-3.2-1B",
         load_in_4bit=True,
     ),
-    data=DataConfig(
-        dataset_name="tatsu-lab/alpaca",
-        format="alpaca",
-    ),
+    data=DataConfig(dataset_name="tatsu-lab/alpaca", format="auto"),
 )
 artifacts = train(config)
-```
-
-### Autopilot (No Manual Config)
-
-```python
-from easylora import autopilot_plan, autopilot_train
-
-plan = autopilot_plan(
-    model="meta-llama/Llama-3.2-1B",
-    dataset="tatsu-lab/alpaca",
-    quality="balanced",
-)
-for line in plan.to_pretty_lines():
-    print(line)
-
-artifacts = autopilot_train(
-    model="meta-llama/Llama-3.2-1B",
-    dataset="tatsu-lab/alpaca",
-)
 ```
 
 ### Using the Trainer Directly

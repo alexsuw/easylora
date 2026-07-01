@@ -1,0 +1,35 @@
+# Publish-ready adapter recipe. Replace hub_repo_id before training.
+model:
+  base_model: "meta-llama/Llama-3.2-1B"
+  torch_dtype: "auto"
+
+data:
+  dataset_name: "tatsu-lab/alpaca"
+  format: "auto"
+  max_seq_len: 2048
+  val_split_ratio: 0.02
+
+lora:
+  r: 16
+  alpha: 32
+  target_modules: "auto"
+
+optim:
+  lr: 2e-4
+
+training:
+  epochs: 3
+  batch_size: 4
+  grad_accum: 4
+  logging_steps: 10
+  save_steps: 500
+
+output:
+  output_dir: "./output/publishable-adapter"
+  run_name: "publishable-adapter"
+  push_to_hub: true
+  hub_repo_id: "your-username/my-easylora-adapter"
+  hub_private: false
+
+repro:
+  seed: 42
